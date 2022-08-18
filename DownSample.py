@@ -1,4 +1,3 @@
-# time : 2022/5/10 9:13
 from keras.models import *
 from keras.layers import *
 from Final_Model.dhaspp import DHASPP
@@ -15,48 +14,48 @@ def _DownSample_Net(input_height=48, imput_weight=48):
     x = conv2d_block(img_input, 64)
     # x = IR_Block(x, 64)
 
-    f1 = x
-    f11 = _DownSample(f1, _filters=64,_strides=(2, 2))
-    f12 = _DownSample(f1, _filters=64,_strides=(4, 4))
+    e1 = x
+    e11 = _DownSample(e1, _filters=64,_strides=(2, 2))
+    e12 = _DownSample(e1, _filters=64,_strides=(4, 4))
 
     x = _DownSample(x, _filters=128,_strides=(2, 2))
     x = conv2d_block(x, 128)
     # x = IR_Block(x, 128)
 
-    f2 = x
-    f21 = Conv2DTranspose(128, (2, 2), strides=(2, 2), padding='same')(f2)
-    f22 = _DownSample(f2, _filters=128,_strides=(2, 2))
+    e2 = x
+    e21 = Conv2DTranspose(128, (2, 2), strides=(2, 2), padding='same')(e2)
+    e22 = _DownSample(e2, _filters=128,_strides=(2, 2))
 
     x = _DownSample(x, _filters=128,_strides=(2, 2))
     x = conv2d_block(x, 256)
     # x = IR_Block(x, 256)
 
-    f3 = x
-    f31 = Conv2DTranspose(256, (2, 2), strides=(2, 2), padding='same')(f3)
-    f32 = Conv2DTranspose(256, (4, 4), strides=(4, 4), padding='same')(f3)
+    e3 = x
+    e31 = Conv2DTranspose(256, (2, 2), strides=(2, 2), padding='same')(e3)
+    e32 = Conv2DTranspose(256, (4, 4), strides=(4, 4), padding='same')(e3)
 
 # =======================================================================================================
 
     bridge = DHASPP(x, 256)
 
 # =======================================================================================================
-#     c7 = (concatenate([x, f22, f12], axis=-1))
-#     c7 = (concatenate([f3, f22, f12], axis=-1))
-    c7 = (concatenate([bridge, f3, f22, f12], axis=-1))
-    c7 = conv2d_block_1(c7, 256)
-    # c7 = ResSEModule(c7, 4, 256)
-    # c7 = attention_module(c7)
-    c7 = conv2d_block(c7, 256)
+#     d7 = (concatenate([x, e22, e12], axis=-1))
+#     d7 = (concatenate([e3, e22, e12], axis=-1))
+    d7 = (concatenate([bridge, e3, e22, e12], axis=-1))
+    d7 = conv2d_block_1(d7, 256)
+    # d7 = ResSEModule(d7, 4, 256)
+    # d7 = attention_module(d7)
+    d7 = conv2d_block(d7, 256)
 
-    c8 = Conv2DTranspose(128, (2, 2), strides=(2, 2), padding='same', name='convtran_3')(c7)
-    c8 = (concatenate([c8, f2, f11, f31], axis=-1))
-    c8 = conv2d_block_1(c8, 128)
-    # c8 = ResSEModule(c8, 4, 128)
-    # c8 = attention_module(c8)
-    c8 = conv2d_block(c8, 128)
-    c9 = Conv2DTranspose(64, (2, 2), strides=(2, 2), padding='same', name='convtran_4')(c8)
+    d8 = Conv2DTranspose(128, (2, 2), strides=(2, 2), padding='same')(d7)
+    d8 = (concatenate([d8, e2, e11, e31], axis=-1))
+    d8 = conv2d_block_1(d8, 128)
+    # d8 = ResSEModule(d8, 4, 128)
+    # d8 = attention_module(d8)
+    d8 = conv2d_block(d8, 128)
+    d9 = Conv2DTranspose(64, (2, 2), strides=(2, 2), padding='same')(d8)
 
-    o = (concatenate([c9, f1, f21, f32], axis=-1))
+    o = (concatenate([d9, e1, e21, e32], axis=-1))
     o = conv2d_block_1(o, 64)
     # o = ResSEModule(o, 4, 64)
     # o = attention_module(o)
